@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Smart Factory Control Room</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<style>
+
+body{
+    background:#0f172a;
+    color:white;
+    font-family:Arial;
+}
+
+.sidebar{
+    width:220px;
+    height:100vh;
+    position:fixed;
+    background:#020617;
+    padding:20px;
+}
+
+.sidebar h2{
+    color:#38bdf8;
+}
+
+.sidebar button{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    background:#1e293b;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+.main{
+    margin-left:240px;
+    padding:20px;
+}
+
+.cards{
+    display:flex;
+    gap:20px;
+}
+
+.card{
+    background:#1e293b;
+    padding:20px;
+    border-radius:10px;
+    width:180px;
+    text-align:center;
+}
+
+.chart-row{
+    display:flex;
+    gap:30px;
+    margin-top:30px;
+}
+
+canvas{
+    background:#1e293b;
+    padding:10px;
+    border-radius:10px;
+}
+
+.page{
+    display:none;
+}
+
+.active{
+    display:block;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<h2>Factory AI</h2>
+
+<button onclick="showPage('control')">Control Room</button>
+<button onclick="showPage('maintenance')">AI Maintenance</button>
+<button onclick="showPage('energy')">Energy</button>
+<button onclick="showPage('water')">Water</button>
+<button onclick="showPage('carbon')">Carbon</button>
+
+</div>
+
+<div class="main">
+
+<h1>Smart Factory Industry 4.0 Dashboard</h1>
+
+<!-- CONTROL ROOM -->
+
+<div id="control" class="page active">
+
+<div class="cards">
+
+<div class="card">
+<h3>Temperature</h3>
+<h2 id="temp">40</h2>
+</div>
+
+<div class="card">
+<h3>Power</h3>
+<h2 id="power">900</h2>
+</div>
+
+<div class="card">
+<h3>Vibration</h3>
+<h2 id="vibration">0.4</h2>
+</div>
+
+<div class="card">
+<h3>Humidity</h3>
+<h2 id="humidity">60</h2>
+</div>
+
+</div>
+
+<div class="chart-row">
+
+<canvas id="tempChart"></canvas>
+<canvas id="powerChart"></canvas>
+
+</div>
+
+</div>
+
+<!-- MAINTENANCE -->
+
+<div id="maintenance" class="page">
+
+<h2>Predictive Maintenance AI</h2>
+
+<div id="healthGauge"></div>
+
+<p>Machine Health Score based on AI sensor analysis.</p>
+
+</div>
+
+<!-- ENERGY -->
+
+<div id="energy" class="page">
+
+<h2>Energy Analytics</h2>
+
+<canvas id="energyChart"></canvas>
+
+</div>
+
+<!-- WATER -->
+
+<div id="water" class="page">
+
+<h2>Water Consumption</h2>
+
+<canvas id="waterChart"></canvas>
+
+</div>
+
+<!-- CARBON -->
+
+<div id="carbon" class="page">
+
+<h2>Carbon Emissions</h2>
+
+<canvas id="carbonChart"></canvas>
+
+</div>
+
+</div>
+
+<script>
+
+function showPage(page){
+
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+document.getElementById(page).classList.add('active');
+
+}
+
+let labels=[1,2,3,4,5,6,7,8,9,10]
+
+let tempData=[40,41,42,41,43,44,45,44,46,47]
+let powerData=[900,910,905,920,930,940,935,950,960,970]
+
+let tempChart=new Chart(document.getElementById('tempChart'),{
+type:'line',
+data:{
+labels:labels,
+datasets:[{
+label:'Temperature',
+data:tempData,
+borderColor:'cyan',
+tension:0.4
+}]
+}
+})
+
+let powerChart=new Chart(document.getElementById('powerChart'),{
+type:'line',
+data:{
+labels:labels,
+datasets:[{
+label:'Power',
+data:powerData,
+borderColor:'orange',
+tension:0.4
+}]
+}
+})
+
+let energyChart=new Chart(document.getElementById('energyChart'),{
+type:'bar',
+data:{
+labels:['Used','Waste'],
+datasets:[{
+data:[70,30],
+backgroundColor:['green','red']
+}]
+}
+})
+
+let waterChart=new Chart(document.getElementById('waterChart'),{
+type:'bar',
+data:{
+labels:['Used','Saved'],
+datasets:[{
+data:[6000,4000],
+backgroundColor:['blue','cyan']
+}]
+}
+})
+
+let carbonChart=new Chart(document.getElementById('carbonChart'),{
+type:'bar',
+data:{
+labels:['Current','Reduced'],
+datasets:[{
+data:[80,40],
+backgroundColor:['red','green']
+}]
+}
+})
+
+var gaugeData=[{
+type:"indicator",
+mode:"gauge+number",
+value:75,
+title:{text:"Health Score"},
+gauge:{axis:{range:[0,100]}}
+}]
+
+Plotly.newPlot('healthGauge',gaugeData)
+
+function updateData(){
+
+let lastTemp=tempData[tempData.length-1]
+let lastPower=powerData[powerData.length-1]
+
+let temp=lastTemp+(Math.random()*4-2)
+let power=lastPower+(Math.random()*40-20)
+
+temp=Math.round(temp)
+power=Math.round(power)
+
+let vibration=(Math.random()*0.5+0.4).toFixed(2)
+let humidity=Math.floor(Math.random()*10)+65
+
+document.getElementById('temp').innerText=temp
+document.getElementById('power').innerText=power
+document.getElementById('vibration').innerText=vibration
+document.getElementById('humidity').innerText=humidity
+
+tempData.push(temp)
+powerData.push(power)
+
+labels.push(labels.length+1)
+
+if(tempData.length>12){
+
+tempData.shift()
+powerData.shift()
+labels.shift()
+
+}
+
+tempChart.update()
+powerChart.update()
+
+}
+
+setInterval(updateData,3000)
+
+</script>
+
+</body>
+</html>
